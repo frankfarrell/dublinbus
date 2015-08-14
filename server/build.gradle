@@ -1,0 +1,72 @@
+ext {
+  reactorVersion = '2.0.4.RELEASE'
+}
+
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath("org.springframework.boot:spring-boot-gradle-plugin:1.2.5.RELEASE")
+  }
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+
+jar {
+  baseName = 'dublinbus-reactor'
+  version = '0.3.0'
+}
+
+repositories {
+		maven { url 'http://repo.spring.io/libs-milestone' }
+		maven { url "https://oss.sonatype.org/content/repositories/releases/" }
+		
+		//SPatial
+		//OSGEO GeoTools repo</id>
+        maven { url "http://download.osgeo.org/webdav/geotools" }
+        //Hibernate Spatial repo</id>
+        maven { url "http://www.hibernatespatial.org/repository" }
+        maven { url "https://repository.jboss.org/nexus/content/repositories/releases/" }
+		
+		mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+  // Reactor Core
+  compile 'io.projectreactor:reactor-core:2.0.4.RELEASE'
+
+  // Reactor Stream
+  compile "io.projectreactor:reactor-stream:2.0.4.RELEASE"
+
+   // Reactor Net
+   compile 'io.projectreactor:reactor-net:2.0.4.RELEASE'
+
+   // Netty for Reactor Net (auto detects if in classpath)
+   compile 'io.netty:netty-all:4.0.27.Final'
+   
+   compile "org.slf4j:slf4j-api:1.7.11"
+   compile "ch.qos.logback:logback-classic:1.1.2"
+   
+   compile "com.fasterxml.jackson.core:jackson-databind:2.5.1"
+   
+    testCompile("junit:junit")
+   
+   	compile("org.springframework.boot:spring-boot-starter-data-jpa")
+   
+	// Spatial Stuff, uses hibernate instead of spring data
+	compile "org.hibernate:hibernate-spatial:4.3-SNAPSHOT"
+	compile "org.hibernate:hibernate-entitymanager:4.3.5.Final"
+
+    compile "postgresql:postgresql:8.4-701.jdbc3"
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '2.4'
+}
