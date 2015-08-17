@@ -1,0 +1,66 @@
+--Route 747 on Sunday morning, actual
+
+SELECT to_timestamp(timestamp/1000000) as time, ST_AsText(coordinates), stopid, delay
+FROM public.busgps
+
+WHERE lineid LIKE '747' AND vehiclejourneyid = '14960' ORDER BY vehiclejourneyid,time;
+
+--ST_DWithin(coordinates, ST_SetSRID(ST_MakePoint(-6.181, 53.34), 26910), .4) AND 
+
+
+--Expected
+SELECT trip_id, arrival_time, departure_time, ST_AsText(ST_MakePoint(stop_lon, stop_lat)) as coordinates, stop_sequence, public.stop_times.stop_id,
+	stop_name,
+       shape_dist_traveled, 
+       timepoint
+  FROM public.stop_times, public.stops
+  WHERE 
+	public.stop_times.stop_id = public.stops.stop_id
+  AND trip_id LIKE '14960.1708.0-747-b12-1.467.I'
+  ORDER BY departure_time;
+
+
+
+From this you can see that 747 on Jan 1st2012 was about minute and half early. 
+The delay in GPS track gives -131, so roughly similar
+
+Make a geometry out of the route: 
+Point, stop id, timestamp, distance travelled
+
+Make an updating geometry out of actual gps, distance travlled. 
+
+Client side: Map, graph of difference?
+
+
+TODO 
+
+SELECT 
+	SUBSTRING(trip_id FROM '^[^.]*') as trip_id, 			--join on this
+	GREATEST(arrival_time, departure_time) as time,  					--Convert this to unix epoch time
+	ST_AsText(ST_MakePoint(stop_lon, stop_lat)) as expected_coordinates, 
+	stop_sequence, 
+	SUBSTRING(stoptimes.stop_id FROM '[1-9]{0,1}.{3}$'),--Skim off the zero at the end, this is the format from GPS file
+	stop_name,
+	shape_dist_traveled, 
+	timepoint
+	--ST_Length(ST_MakeLine(ST_MakePoint(stops.stop_lon, stops.stop_lat) ORDER BY timepoint))
+	--(SELECT st_Length(ST_MakeLine(t.shape_utm)) as distance FROM
+	--	(ST_MakePoint(stop_lon, stop_lat) FROM stops ORDER BY GREATEST(arrival_time, departure_time)])) as t)
+	FROM 
+		(SELECT ST_MakeLine(ARRAY(SELECT ST_MakePoint(stop_lon, stop_lat) 
+			FROM public.stops as stops, public.stop_times as stoptimes
+			WHERE 
+				stoptimes.stop_id = stops.stop_id ORDER BY departure_time))) as theLine,
+		public.stop_times as stoptimes, 
+		public.stops as stops
+	WHERE 
+		stoptimes.stop_id = stops.stop_id
+		AND trip_id LIKE '14960.1708.0-747-b12-1.467.I'
+		ORDER BY time;
+
+--Make the line
+
+--SELECT gps.gps_track, ST_MakeLine(gps.the_geom ORDER BY gps_time) As newgeom
+--	FROM gps_points As gps
+
+--ST_Length(ST_MakeLine(ARRAY[SELECT ST_MakePoint(stop_lon, stop_lat) FROM public.stop_times ORDER BY GREATEST(arrival_time, departure_time)])))

@@ -29,6 +29,12 @@ import com.vividsolutions.jts.geom.Point;
 	At Stop [0=no,1=yes]
 	*/
 	
+/*
+ * In GTFS 
+ * Journey id is of form 1.1714.0-33A-y12-1.155.I
+ * 
+ */
+
 @Entity
 public class BusGPS{
 	
@@ -38,7 +44,27 @@ public class BusGPS{
 	
 	private long timestamp;
 	private String lineId;//eg bus number
+	private String direction;
+	
+	public String getDirection() {
+		return direction;
+	}
+
+	public void setDirection(String direction) {
+		this.direction = direction;
+	}
+
 	private String journeyPatternId;//Can be null sometimes
+	
+	private String timeFrame;
+	public String getTimeFrame() {
+		return timeFrame;
+	}
+
+	public void setTimeFrame(String timeFrame) {
+		this.timeFrame = timeFrame;
+	}
+
 	private String vehicleJourneyId;//eg instance of bus number
 	private boolean congestion;
 	

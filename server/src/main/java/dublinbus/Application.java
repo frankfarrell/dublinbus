@@ -66,7 +66,7 @@ public class Application implements CommandLineRunner {
 	
 		}).await();
 
-		countDownLatch.await(1000, TimeUnit.SECONDS);
+		countDownLatch.await();
 		
 	}
 

@@ -1,0 +1,28 @@
+Creating route tables: 
+
+Instal gtfsdb: 
+https://github.com/OpenTransitTools/gtfsdb
+
+Get http://www.dublinked.ie/datastore/server/FileServerWeb/FileChecker?metadataUUID=6ac092f3e34c4764b78ecfaf8198f482&filename=google_transit_dublinbus_P20130315-1546.zip
+
+Run: 
+C:\DublinBus\gtfsdb>bin\gtfsdb-load --database_url postgresql://postgres@localhost:9995/dublinbus ..\google_transit_dublinbus_P20130315-1546.zip
+
+This takes a while
+
+Relation between route_id and gps id?
+GPS: 
+LineId, eg 46a
+Time Frame: eg 2012-12-31, we can work out day of service (not from timestamp)
+Vehicle Journey ID : eg 3883
+
+Notes: Direction is ignored here, need to watch out for false positives(eg bus going other direction)
+
+GTFS:
+Stop Times refers to trip_id in 
+Trip, where route_id refers to eg "1582.1002.0-116-b12-1.88.O"
+Routes, where route_id is long name "0-116-b12-1" and short name is bus number, ge 46a .
+
+GPS.vehiclejourneyid is the the same as GTFS trips.trip_id start
+
+Gps Stop Id refers backwards?
