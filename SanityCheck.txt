@@ -64,3 +64,18 @@ SELECT
 --	FROM gps_points As gps
 
 --ST_Length(ST_MakeLine(ARRAY[SELECT ST_MakePoint(stop_lon, stop_lat) FROM public.stop_times ORDER BY GREATEST(arrival_time, departure_time)])))
+
+SRID=4326
+
+CREATE MATERIALIZED VIEW route_lines_mat
+AS
+SELECT "substring"(stop_times.trip_id::text, '^[^.]*'::text) AS trip_id,
+    st_makeline(ARRAY( SELECT st_makepoint(stops_1.stop_lon::double precision, stops_1.stop_lat::double precision) AS st_makepoint
+           FROM stops stops_1,
+            stop_times stop_times_1
+          WHERE stop_times_1.stop_id::text = stops_1.stop_id::text
+          ORDER BY GREATEST(stop_times_1.arrival_time, stop_times_1.departure_time))) AS st_makeline
+   FROM stop_times,
+    stops
+  WHERE stop_times.stop_id::text = stops.stop_id::text
+  GROUP BY stop_times.trip_id;

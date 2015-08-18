@@ -1,0 +1,11 @@
+CREATE MATERIALIZED VIEW route_shapes
+AS
+ SELECT  St_MakeLine(ordered_stops.geom), 
+	"substring"( ordered_stops.trip_id::text, '^[^.]*'::text) AS trip_id
+  FROM (
+		SELECT geom, public.stops.stop_id, trip_id 
+		FROM public.stop_times, public.stops
+		WHERE public.stops.stop_id = public.stop_times.stop_id
+		ORDER BY GREATEST(public.stop_times.arrival_time, public.stop_times.departure_time)
+	) AS ordered_stops
+  GROUP BY ordered_stops.trip_id;
