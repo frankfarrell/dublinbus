@@ -3,6 +3,7 @@ package dublinbus;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import dublinbus.entities.BusGPS;
 import reactor.io.net.ChannelStream;
 import reactor.io.net.ReactorChannelHandler;
 import reactor.rx.Streams;

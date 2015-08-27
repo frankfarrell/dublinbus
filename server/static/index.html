@@ -20,7 +20,7 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<script>
 
-		var map = L.map('map').setView([-6,53], 13);
+		var map = L.map('map').setView([53.5914, -6.1562], 13);
 
 		L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			maxZoom: 18,
@@ -49,12 +49,27 @@
 			   L.geoJson(routes).addTo(map);
 			});
 		*/
-		$.get("http://localhost:8080/route_materializeds/1",function(evt){
+		$.get("http://localhost:8080/route_shapeses/1",function(evt){
 			   
-			   route = JSON.parse(evt.route);
+			   route = evt.st_makeline;
 			   
 			   L.geoJson(route).addTo(map);
 			});
+		
+		$.get("http://localhost:8080/routes_enricheds/search/findByTripId?tripId=1",function(evt){
+			   
+			   route = evt._embedded.routes_enricheds;
+			   
+			   route.forEach(function(stop){
+					var coords = stop.geom.coordinates;
+					var marker = L.marker([coords[1], coords[0]]).addTo(map);
+					marker.bindPopup("Time: " + stop.timestamp + "\n Distance: " + stop.distance_travlled);
+			   });
+			   
+			});
+			
+			
+		//http://localhost:8080/routes_enricheds/search/findByTripId?tripId=1
 	</script>
 </body>
 </html>

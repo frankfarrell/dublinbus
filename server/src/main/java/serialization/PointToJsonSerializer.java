@@ -1,6 +1,11 @@
-package dublinbus;
+package serialization;
 
 import java.io.IOException;
+
+import org.geotools.geojson.GeoJSON;
+import org.geotools.geojson.GeoJSONUtil;
+import org.geotools.geojson.geom.GeometryJSON;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -18,14 +23,19 @@ public class PointToJsonSerializer extends JsonSerializer<Point> {
         try
         {
             if(value != null) {             
-                double lat = value.getY();
+                /*double lat = value.getY();
                 double lon = value.getX();
                 jsonValue = String.format("POINT (%s %s)", lat, lon);
+                */
+            	GeometryJSON g = new GeometryJSON();
+
+                jsonValue = g.toString(value);
+                
             }
         }
         catch(Exception e) {}
 
-        jgen.writeString(jsonValue);
+        jgen.writeRawValue(jsonValue);
     }
 
 }

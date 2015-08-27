@@ -1,4 +1,4 @@
-package dublinbus.entities;
+package serialization;
 
 import java.io.IOException;
 
@@ -32,7 +32,7 @@ public class LineToJsonSerializer extends JsonSerializer<LineString> {
 	        }
 	        catch(Exception e) {}
 
-	        gen.writeString(jsonValue);
+	        gen.writeRawValue(jsonValue);
 	}
 
 }

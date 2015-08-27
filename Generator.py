@@ -29,9 +29,9 @@ def sendRowToServer(row):
         "timestamp": int(row[0]),
         "lineId": row[1],
         "journeyPatternId":row[3],
-		"direction": row[4],
+		"direction": row[2],
         "vehicleJourneyId":row[5],
-		"timeFrame": row[6],
+		"timeFrame": row[4],
         "congestion":True if int(row[7]) == 1 else False,
         "coordinates" : "POINT (" + row[8] +" " +row[9] + ")",
         "delay" : float(row[10]),
@@ -42,9 +42,9 @@ def sendRowToServer(row):
 	}
     sendToServer(json.dumps(asMap))
 
-lineNumber =  int(sys.argv[1])
+lineNumber =  int(sys.argv[2])
 
-with open("Sample.csv", "rb") as csvfile:
+with open(sys.argv[1], "rb") as csvfile:
     datareader = csv.reader(csvfile) 
     sliceRows = islice(datareader, lineNumber, None)
     firstRow = sliceRows.next()

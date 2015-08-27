@@ -1,8 +1,11 @@
-package dublinbus;
+package dublinbus.entities;
 
 import javax.persistence.*;
 
 import org.hibernate.annotations.Type;
+
+import serialization.JsonToPointDeserializer;
+import serialization.PointToJsonSerializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -88,6 +91,7 @@ public class BusGPS{
 	}
 
 	public void setCoordinates(Point coordinates) {
+		coordinates.setSRID(4326);
 		this.coordinates = coordinates;
 	}
 	

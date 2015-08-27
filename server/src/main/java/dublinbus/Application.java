@@ -1,6 +1,6 @@
 package dublinbus;
 
-import dublinbus.BusGPS;
+import dublinbus.entities.BusGPS;
 import reactor.Environment;
 import reactor.fn.Consumer;
 import reactor.io.buffer.Buffer;
@@ -33,6 +33,10 @@ public class Application implements CommandLineRunner {
 	@Autowired
 	BusGPSRepository repository;
 	
+	@Autowired
+	BusGPSRealtimeService realtimeService;
+	
+	
 	public static void main(String[] args) throws InterruptedException{
 		
 		SpringApplication.run(Application.class, args);
@@ -61,7 +65,19 @@ public class Application implements CommandLineRunner {
 		server.start(input -> {
 		        input
 		        	.decode(codec)
-		        	.consume( data -> repository.save(data) );
+		        	.consume( data -> {
+		        		//I think this means that the bus is not in service, ie its isen route to destination start, for instance in the morning at 6am its common
+		        		if(!data.getJourneyPatternId().equals("null")){
+		        			repository.save(data); 
+		        		try {
+							realtimeService.submityBusGPS(data);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+		        		}
+		        		
+		        	});
 		        return Streams.never();
 	
 		}).await();
