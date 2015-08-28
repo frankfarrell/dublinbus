@@ -34,6 +34,7 @@ import com.vividsolutions.jts.operation.distance.DistanceOp;
 
 import dublinbus.entities.BusGPS;
 import dublinbus.entities.Routes_enriched;
+import dublinbus.redis.RedisService;
 
 /*
  * Accepts a new BusGPS data point
@@ -48,12 +49,14 @@ import dublinbus.entities.Routes_enriched;
 public class BusGPSRealtimeService {
 
 	RouteEstimatorService routeEstimatorService;
+	RedisService redisService;
 	
 	@Autowired
-    public BusGPSRealtimeService(RouteEstimatorService routeEstimatorService) {
+    public BusGPSRealtimeService(RouteEstimatorService routeEstimatorService, RedisService redisService) {
 
 		this.routeEstimatorService = routeEstimatorService;
-    }
+		this.redisService = redisService;
+	}
 	
 	public void submityBusGPS(BusGPS busGPS) throws ParseException{
 		
@@ -152,17 +155,19 @@ public class BusGPSRealtimeService {
 		Date endDate = timeFormatter.parse(endStop.getTimestamp());
 		Date startDate = timeFormatter.parse(startStop.getTimestamp());
 		
-		System.out.println("Hello world");
-		
 		LocalDateTime endDateParsed;// = LocalDateTime.parse(endStop.getTimestamp(), timeFormatter);
 		LocalDateTime startDateParsed;// = LocalDateTime.parse(startStop.getTimestamp(), timeFormatter);
 		
 		String endStopTimestamp = endStop.getTimestamp();
 		String startStopTimestamp = endStop.getTimestamp();
 		
-		//We need to convert 24 to 00 in hour
+		//We need to convert 24 to 00 in hour, etc
 		endStopTimestamp = endStopTimestamp.replaceFirst("^24:", "00:");
 		startStopTimestamp = startStopTimestamp.replaceFirst("^24:", "00:");
+		
+		endStopTimestamp = endStopTimestamp.replaceFirst("^25:", "01:");
+		startStopTimestamp = startStopTimestamp.replaceFirst("^25:", "01:");
+		
 		
 		//If it is currently after twelve, is less than 6, but the stops are now, set date to yesterday. 
 		if(now.get(ChronoField.HOUR_OF_DAY)< 5){
@@ -210,11 +215,10 @@ public class BusGPSRealtimeService {
 		
 		
 		double delayInSeconds = Duration.between(expectedBusTime, actualBusTime).getSeconds();
-		System.out.println("Bus: " + busGPS.getVehicleJourneyId() + ", is delayed: " +delayInSeconds + "at point: " + busGPS.getCoordinates().toString());
-		System.out.println("Bus: " + busGPS.getVehicleJourneyId() + ", compared to: Geometry: " + endStop.getGeom() + ", " + endStop.getStopId());
 		
+		//TODO Make this an async que
+		redisService.sendRedisMessage(busGPS.getLineId(), busGPS.getVehicleJourneyId() , delayInSeconds,  busGPS.getCoordinates());
 		
-		//Push this to redis service
 		
 	}
 	

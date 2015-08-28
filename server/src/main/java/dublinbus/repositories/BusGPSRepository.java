@@ -1,4 +1,4 @@
-package dublinbus;
+package dublinbus.repositories;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

@@ -1,4 +1,4 @@
-package dublinbus;
+package dublinbus.repositories;
 
 import java.util.List;
 
@@ -14,10 +14,10 @@ import dublinbus.entities.Routes_enriched;
 public interface EnrichedRouteRepository extends CrudRepository<Routes_enriched, Routes_enriched.RouteId>{
 
 	//Does this work here?
-	@Cacheable
+	//@Cacheable
 	List<Routes_enriched> findByTripId(@Param("tripId") String trip_id);
 	
-	@Cacheable
+	//@Cacheable
 	@Query(value ="SELECT * FROM public.routes_enriched WHERE route_short_name =:routeShortName ORDER BY st_distance(geom, ST_SetSRID(St_MakePoint(:lon, :lat),4326)) ASC,  EXTRACT(EPOCH FROM to_timestamp(:timestamp ) - to_timestamp(timestamp ,'HH24:MI:SS'));", nativeQuery = true)
 	List<Routes_enriched> findByRouteShortName(
 			@Param("routeShortName") String routeShortName, 

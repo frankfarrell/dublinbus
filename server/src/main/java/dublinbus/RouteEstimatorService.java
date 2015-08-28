@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import dublinbus.entities.BusGPS;
 import dublinbus.entities.Routes_enriched;
+import dublinbus.repositories.EnrichedRouteRepository;
 
 @Service
 public class RouteEstimatorService {
@@ -33,8 +34,7 @@ public class RouteEstimatorService {
 		
 		Routes_enriched sampleRoute =  stopsForTrip.get(0);
 		String routeName  = sampleRoute.getRouteShortName();
-		
-		System.out.println("Compaing: " + routeName + "with" + lineId);
+
 		if(routeName.equals(lineId)){
 			return stopsForTrip;
 		}

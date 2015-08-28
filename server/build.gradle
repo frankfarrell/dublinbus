@@ -55,7 +55,7 @@ dependencies {
    compile "org.slf4j:slf4j-api:1.7.11"
    compile "ch.qos.logback:logback-classic:1.1.2"
    
-   compile "com.fasterxml.jackson.core:jackson-databind:2.5.1"
+   //compile "com.fasterxml.jackson.core:jackson-databind:2.5.1"
    
     testCompile("junit:junit")
    
@@ -68,6 +68,19 @@ dependencies {
 
     compile "postgresql:postgresql:8.4-701.jdbc3"
     compile "org.geotools:gt-geojson:12-RC1"
+    
+    //Redis
+    compile 'org.springframework.data:spring-data-redis:1.5.2.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-redis'
+    
+    compile 'org.codehaus.jackson:jackson-core-asl:1.9.4'
+    compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.4'
+    
+    compile 'com.corundumstudio.socketio:netty-socketio:1.7.7'
+    
+    compile 'commons-collections:commons-collections:3.2.1'
+
+    
 }
 
 task wrapper(type: Wrapper) {
