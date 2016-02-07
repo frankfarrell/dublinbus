@@ -22,6 +22,7 @@ jar {
 }
 
 repositories {
+        maven { url "http://download.osgeo.org/webdav/geotools/" }
 		maven { url 'http://repo.spring.io/libs-milestone' }
 		maven { url "https://oss.sonatype.org/content/repositories/releases/" }
 		
@@ -31,7 +32,6 @@ repositories {
         //Hibernate Spatial repo</id>
         maven { url "http://www.hibernatespatial.org/repository" }
         maven { url "https://repository.jboss.org/nexus/content/repositories/releases/" }
-        maven { url "http://download.osgeo.org/webdav/geotools/" }
 		
 		mavenCentral()
 }
@@ -40,7 +40,13 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-  // Reactor Core
+
+    compile('com.netflix.hystrix:hystrix-core:1.4.23')
+    compile('com.netflix.hystrix:hystrix-javanica:1.4.23')
+    compile('com.netflix.hystrix:hystrix-dashboard:1.4.23')
+    compile('com.netflix.hystrix:hystrix-metrics-event-stream:1.4.10')
+
+    // Reactor Core
   compile 'io.projectreactor:reactor-core:2.0.4.RELEASE'
 
   // Reactor Stream
@@ -79,6 +85,7 @@ dependencies {
     compile 'com.corundumstudio.socketio:netty-socketio:1.7.7'
     
     compile 'commons-collections:commons-collections:3.2.1'
+
 
     
 }

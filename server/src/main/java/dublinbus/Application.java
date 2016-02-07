@@ -1,7 +1,9 @@
 package dublinbus;
 
+import com.netflix.hystrix.contrib.javanica.aop.aspectj.HystrixCommandAspect;
 import dublinbus.entities.BusGPS;
 import dublinbus.repositories.BusGPSRepository;
+import org.springframework.context.annotation.Bean;
 import reactor.Environment;
 import reactor.fn.Consumer;
 import reactor.io.buffer.Buffer;
@@ -36,8 +38,12 @@ public class Application implements CommandLineRunner {
 	
 	@Autowired
 	BusGPSRealtimeService realtimeService;
-	
-	
+
+	@Bean
+	public HystrixCommandAspect hystrixAspect() {
+		return new HystrixCommandAspect();
+	}
+
 	public static void main(String[] args) throws InterruptedException{
 		
 		SpringApplication.run(Application.class, args);

@@ -2,6 +2,7 @@ package dublinbus.redis;
 
 import javax.annotation.Resource;
 
+import dublinbus.entities.Routes_enriched;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -29,11 +30,22 @@ import com.vividsolutions.jts.geom.Point;
 import dublinbus.entities.BusDelayed;
 import dublinbus.entities.BusGPS;
 
+import java.util.List;
+
 @Service
 public class RedisService {
 
+	public static final String BLACKLIST_NAMESPACE = "lineblacklist";
+
 	@Autowired
-	private RedisTemplate<String, BusDelayed> redisTemplate;
+	private RedisTemplate<String, BusDelayed> busDelatedRedisTemplate;
+
+	@Autowired
+	private RedisTemplate<String, List<Routes_enriched>> routeEnrichedRedisTemplate;
+
+	@Autowired
+	private RedisTemplate<String, String> lineBlacklistTemplate;
+
 
 	/*
 	 * We manage a list of lineId_tripId, with data in the list
@@ -76,11 +88,37 @@ public class RedisService {
         return server;
 
     }
-	
-	public void sendRedisMessage(String lineId, String tripId, double delay, Point coordinates){
-		//listOps.rightPush(userId, url.toExternalForm());
-		
-		//Is there a way to filter on this in the service, eg so that we only send over socket data about buses of interest?
-		redisTemplate.convertAndSend("busdelayed."+lineId, new BusDelayed(coordinates, delay, lineId, tripId));
+
+	public boolean isBusInBlacklist(String lineId){
+
+		return lineBlacklistTemplate.opsForSet().isMember(BLACKLIST_NAMESPACE, lineId);
 	}
+
+	public boolean addBusToBlackList(String lineId){
+
+		//TODO If list doesnt exist, create with TTL 5 hours, should only be one ever
+		lineBlacklistTemplate.opsForSet().add(BLACKLIST_NAMESPACE, lineId);
+		return true;
+	}
+
+
+	public void cacheRoute(String lineId, String vehicleJourneyId, List<Routes_enriched> stopsForTrip){
+		routeEnrichedRedisTemplate.opsForValue().set(lineId+"."+vehicleJourneyId, stopsForTrip);
+	}
+
+	public boolean isOnWhiteList(String lineId, String vehicleJourneyId){
+		return routeEnrichedRedisTemplate.opsForValue().get(lineId+"."+vehicleJourneyId) != null;//TODO Is there an exists?
+	}
+
+	public List<Routes_enriched> getRoute(String lineId, String vehicleJourneyId){
+		return routeEnrichedRedisTemplate.opsForValue().get(lineId+"."+vehicleJourneyId);
+	}
+
+	public void sendRedisMessage(String lineId, String tripId, double delay, Point coordinates){
+
+		//listOps.rightPush(userId, url.toExternalForm());
+		//Is there a way to filter on this in the service, eg so that we only send over socket data about buses of interest?
+		busDelatedRedisTemplate.convertAndSend("busdelayed."+lineId, new BusDelayed(coordinates, delay, lineId, tripId));
+	}
+
 }

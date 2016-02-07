@@ -22,6 +22,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -57,31 +59,31 @@ public class BusGPSRealtimeService {
 		this.routeEstimatorService = routeEstimatorService;
 		this.redisService = redisService;
 	}
-	
+
+
+
+
+	//on a service method
+	@HystrixCommand(
+			commandProperties = {
+					@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "5000")
+					//Max threads allowed is default of 10
+			})
 	public void submityBusGPS(BusGPS busGPS) throws ParseException{
-		
-		//Get the list of stops, along with coordinates and distance travlled etc. 
+
+		//Get the list of stops, along with coordinates and distance travlled etc.
+		if(redisService.isBusInBlacklist(busGPS.getLineId() + "."+ busGPS.getVehicleJourneyId())){
+			return;
+		}
+
+		//Service caches reslt internally
 		List<Routes_enriched> stopsForTrip = routeEstimatorService.getEstimateRouteForGps(busGPS);//enrichedEnrichedRouteRepository.findByTripId(busGPS.getVehicleJourneyId());
-		
+
 		if(stopsForTrip == null){
 			return;
 		}
-		
-		//Sort on distance travelled
-		stopsForTrip.sort(new Comparator<Routes_enriched>()
-			{
-				@Override
-				public int compare(Routes_enriched x, Routes_enriched y){
-					if(x.getDistance_travlled() > y.getDistance_travlled()){
-						return 1;
-					}
-					else{
-						return 0;
-					}
-				}
-			}
-		);
-		
+
+
 		ArrayList<LineSegment> listOfSegements = new ArrayList<LineSegment>(stopsForTrip.size());
 		
 		//Null means not set yet
@@ -219,7 +221,5 @@ public class BusGPSRealtimeService {
 		//TODO Make this an async que
 		redisService.sendRedisMessage(busGPS.getLineId(), busGPS.getVehicleJourneyId() , delayInSeconds,  busGPS.getCoordinates());
 		
-		
 	}
-	
 }

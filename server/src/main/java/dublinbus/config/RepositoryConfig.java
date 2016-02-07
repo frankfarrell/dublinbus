@@ -41,7 +41,7 @@ public class RepositoryConfig {
 	public DataSource dataSource(){
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		dataSource.setDriverClassName("org.postgresql.Driver");
-		dataSource.setUrl("jdbc:postgresql://localhost:9995/dublinbus");
+		dataSource.setUrl("jdbc:postgresql://localhost:5432/dublinbus");
 		dataSource.setUsername( "postgres" );
 		dataSource.setPassword( "" );
 		return dataSource;}

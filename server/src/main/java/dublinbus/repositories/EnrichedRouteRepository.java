@@ -13,12 +13,13 @@ import dublinbus.entities.Routes_enriched;
 @RepositoryRestResource
 public interface EnrichedRouteRepository extends CrudRepository<Routes_enriched, Routes_enriched.RouteId>{
 
-	//Does this work here?
-	//@Cacheable
 	List<Routes_enriched> findByTripId(@Param("tripId") String trip_id);
 	
 	//@Cacheable
-	@Query(value ="SELECT * FROM public.routes_enriched WHERE route_short_name =:routeShortName ORDER BY st_distance(geom, ST_SetSRID(St_MakePoint(:lon, :lat),4326)) ASC,  EXTRACT(EPOCH FROM to_timestamp(:timestamp ) - to_timestamp(timestamp ,'HH24:MI:SS'));", nativeQuery = true)
+	@Query(value ="SELECT * FROM public.routes_enriched " +
+			"WHERE route_short_name =:routeShortName " +
+			"ORDER BY st_distance(geom, ST_SetSRID(St_MakePoint(:lon, :lat),4326)) ASC,  " +
+			"EXTRACT(EPOCH FROM to_timestamp(:timestamp ) - to_timestamp(timestamp ,'HH24:MI:SS'));", nativeQuery = true)
 	List<Routes_enriched> findByRouteShortName(
 			@Param("routeShortName") String routeShortName, 
 			@Param("lon") double lonCoord, 
