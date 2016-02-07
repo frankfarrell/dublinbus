@@ -24,6 +24,7 @@ import java.util.Locale;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import org.geotools.math.Line;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -60,9 +61,6 @@ public class BusGPSRealtimeService {
 		this.redisService = redisService;
 	}
 
-
-
-
 	//on a service method
 	@HystrixCommand(
 			commandProperties = {
@@ -70,6 +68,8 @@ public class BusGPSRealtimeService {
 					//Max threads allowed is default of 10
 			})
 	public void submityBusGPS(BusGPS busGPS) throws ParseException{
+
+		//todo log and fallback log
 
 		//Get the list of stops, along with coordinates and distance travlled etc.
 		if(redisService.isBusInBlacklist(busGPS.getLineId() + "."+ busGPS.getVehicleJourneyId())){
@@ -83,41 +83,15 @@ public class BusGPSRealtimeService {
 			return;
 		}
 
+		ArrayList<LineSegment> routeLineSegments = lineSegmentsForRoutePoints(stopsForTrip);
 
-		ArrayList<LineSegment> listOfSegements = new ArrayList<LineSegment>(stopsForTrip.size());
-		
-		//Null means not set yet
-		LineSegment closestSegment = null;
-		Double distance = null;
-		int segStartIndex = 0;
-		
-		Coordinate busCoordinates = new Coordinate(busGPS.getCoordinates().getX(), busGPS.getCoordinates().getY()) ;
-		
-		//Awful stuff, needs some heuristic for when we get close
-		for(int i=0;i<stopsForTrip.size() -2 ;i++){
-			Point point1 = stopsForTrip.get(i).getGeom();
-			Point point2 = stopsForTrip.get(i +1).getGeom();
-				
-			LineSegment lineSeg = new LineSegment(point1.getX(), point1.getY(), point2.getX(), point2.getY());
-			
-			listOfSegements.add(lineSeg);
-			
-			
-			if(closestSegment == null){
-				closestSegment = lineSeg;
-				distance = lineSeg.distance(busCoordinates);
-			}
-			else{
-				double tempDist = lineSeg.distance(busCoordinates);
-				
-				if(tempDist < distance){
-					closestSegment = lineSeg;
-					distance = tempDist;
-					segStartIndex =i;
-				}
-			}
-		}
-		
+		IndexedSegment indexedSegment = getClosestSegment(busGPS, routeLineSegments);
+
+		LineSegment closestSegment = indexedSegment.lineSegment;
+
+		//Index of original route point
+		int segStartIndex = indexedSegment.index *2;
+
 		//If we wanted to create a linestring
 		//Coordinate[] coords = new Coordinate[stopsForTrip.size()];
 		//coords[i] = new Coordinate(point1.getX(), point1.getY()); 
@@ -125,23 +99,19 @@ public class BusGPSRealtimeService {
 		//LineString lineString = fact.createLineString(coords);
 		
 		//Calculate how far along line segment coord is. Calculate distance and expected time. 
-		
+
+		Coordinate busCoordinates = new Coordinate(busGPS.getCoordinates().getX(), busGPS.getCoordinates().getY()) ;
 		Coordinate ratioCoordinate = closestSegment.closestPoint(busCoordinates);
 		
 		LineSegment ratioSeg = new LineSegment(closestSegment.p0, ratioCoordinate);
-		
+
 		//Eg how far along this segment we have travelled
 		double ratio  = ratioSeg.getLength()/ closestSegment.getLength();
-		
 
-		//Persist dif and etc in Redis
-		
-		
 		Routes_enriched startStop = stopsForTrip.get(segStartIndex);
 		Routes_enriched endStop = stopsForTrip.get(segStartIndex +1);
 
 		//We can assume its today
-
 		//TODO Need to stick in timeframe date, and check if its before 12 2013-01-01
 		SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
 		
@@ -149,7 +119,7 @@ public class BusGPSRealtimeService {
 
 		DateTimeFormatter fullFormatter = DateTimeFormatter.ofPattern("yyyy-MM-DD_HH:mm:ss", Locale.ENGLISH).withZone( ZoneId.of("GMT") );
 
-		//TODO Change this to system.currenttime etc, this assumes time from gps is current time
+		//TODO Change this to system.currenttime etc, this assumes time from gps is current time, eg for demo purposes
 		Instant nowTime = Instant.ofEpochMilli(busGPS.getTimestamp()/1000);
 		
 		LocalDateTime now =  LocalDateTime.from(nowTime.atZone(ZoneId.of("GMT")));
@@ -220,6 +190,57 @@ public class BusGPSRealtimeService {
 		
 		//TODO Make this an async que
 		redisService.sendRedisMessage(busGPS.getLineId(), busGPS.getVehicleJourneyId() , delayInSeconds,  busGPS.getCoordinates());
-		
+
 	}
+
+	private ArrayList<LineSegment>  lineSegmentsForRoutePoints(List<Routes_enriched> stopsForTrip){
+		ArrayList<LineSegment> listOfSegments = new ArrayList<LineSegment>(stopsForTrip.size());
+
+		for(int i=0;i<stopsForTrip.size() -2 ;i++){
+			Point point1 = stopsForTrip.get(i).getGeom();
+			Point point2 = stopsForTrip.get(i +1).getGeom();
+
+			LineSegment lineSeg = new LineSegment(point1.getX(), point1.getY(), point2.getX(), point2.getY());
+
+			listOfSegments.add(lineSeg);
+		}
+
+		return listOfSegments;
+	}
+
+	private IndexedSegment getClosestSegment(BusGPS busGPS, ArrayList<LineSegment>  listOfSegments){
+		//Null means not set yet
+		IndexedSegment closestSegment = null;
+		Double distance = null;
+
+		Coordinate busCoordinates = new Coordinate(busGPS.getCoordinates().getX(), busGPS.getCoordinates().getY()) ;
+
+		for(int i=0;i<listOfSegments.size();i++){
+			LineSegment lineSeg = listOfSegments.get(i);
+			if(closestSegment == null){
+				closestSegment = new IndexedSegment(i, lineSeg);
+				distance = lineSeg.distance(busCoordinates);
+			}
+			else{
+				double tempDist = lineSeg.distance(busCoordinates);
+
+				if(tempDist < distance){
+					closestSegment = new IndexedSegment(i, lineSeg);
+					distance = tempDist;
+				}
+			}
+		}
+		return closestSegment;
+	}
+
+	private class IndexedSegment {
+		public final int index;
+		public final LineSegment lineSegment;
+
+		public IndexedSegment(int index, LineSegment lineSegment) {
+			this.index = index;
+			this.lineSegment = lineSegment;
+		}
+	}
+
 }

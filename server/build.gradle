@@ -76,7 +76,7 @@ dependencies {
     compile "org.geotools:gt-geojson:12-RC1"
     
     //Redis
-    compile 'org.springframework.data:spring-data-redis:1.5.2.RELEASE'
+    compile 'org.springframework.data:spring-data-redis:1.6.2.RELEASE'
     compile 'org.springframework.boot:spring-boot-starter-redis'
     
     compile 'org.codehaus.jackson:jackson-core-asl:1.9.4'

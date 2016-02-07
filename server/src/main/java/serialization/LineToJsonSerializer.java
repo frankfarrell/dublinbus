@@ -2,12 +2,12 @@ package serialization;
 
 import java.io.IOException;
 
-import org.geotools.geojson.geom.GeometryJSON;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import org.geotools.geojson.geom.GeometryJSON;
+
 import com.vividsolutions.jts.geom.CoordinateSequence;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;

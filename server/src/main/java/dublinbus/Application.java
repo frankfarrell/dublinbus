@@ -75,7 +75,8 @@ public class Application implements CommandLineRunner {
 		        	.consume( data -> {
 		        		//I think this means that the bus is not in service, ie its isen route to destination start, for instance in the morning at 6am its common
 		        		if(!data.getJourneyPatternId().equals("null")){
-		        			repository.save(data); 
+		        			repository.save(data);
+							logger.info("Route persisted");
 		        		try {
 							realtimeService.submityBusGPS(data);
 						} catch (Exception e) {

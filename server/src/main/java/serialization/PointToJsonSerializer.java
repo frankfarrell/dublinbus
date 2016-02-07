@@ -2,14 +2,14 @@ package serialization;
 
 import java.io.IOException;
 
-import org.geotools.geojson.GeoJSON;
-import org.geotools.geojson.GeoJSONUtil;
-import org.geotools.geojson.geom.GeometryJSON;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import org.geotools.geojson.GeoJSON;
+import org.geotools.geojson.GeoJSONUtil;
+import org.geotools.geojson.geom.GeometryJSON;
+
 import com.vividsolutions.jts.geom.Point;
 
 public class PointToJsonSerializer extends JsonSerializer<Point> {
@@ -23,13 +23,13 @@ public class PointToJsonSerializer extends JsonSerializer<Point> {
         try
         {
             if(value != null) {             
-                /*double lat = value.getY();
+                double lat = value.getY();
                 double lon = value.getX();
-                jsonValue = String.format("POINT (%s %s)", lat, lon);
-                */
-            	GeometryJSON g = new GeometryJSON();
+                jsonValue = String.format("\"POINT (%s %s)\"", lat, lon);
 
-                jsonValue = g.toString(value);
+            	//GeometryJSON g = new GeometryJSON();
+
+                //jsonValue = g.toString(value);
                 
             }
         }

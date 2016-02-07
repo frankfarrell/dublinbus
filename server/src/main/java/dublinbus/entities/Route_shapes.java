@@ -5,11 +5,12 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.hibernate.annotations.Type;
 
 import serialization.LineToJsonSerializer;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.vividsolutions.jts.geom.LineString;
 
 /*

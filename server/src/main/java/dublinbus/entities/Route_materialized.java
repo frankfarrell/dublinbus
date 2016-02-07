@@ -6,14 +6,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.hibernate.annotations.Type;
 
 import serialization.JsonToPointDeserializer;
 import serialization.LineToJsonSerializer;
 import serialization.PointToJsonSerializer;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Lineal;
 
