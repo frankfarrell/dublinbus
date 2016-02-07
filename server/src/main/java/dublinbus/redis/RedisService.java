@@ -118,7 +118,7 @@ public class RedisService {
 
 		//listOps.rightPush(userId, url.toExternalForm());
 		//Is there a way to filter on this in the service, eg so that we only send over socket data about buses of interest?
-		busDelatedRedisTemplate.convertAndSend("busdelayed."+lineId, new BusDelayed(coordinates, delay, lineId, tripId));
+		busDelatedRedisTemplate.convertAndSend("busdelayed."+tripId, new BusDelayed(coordinates, delay, lineId, tripId));
 	}
 
 }

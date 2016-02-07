@@ -24,7 +24,10 @@ import java.util.Locale;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import com.vividsolutions.jts.geom.impl.PackedCoordinateSequence;
 import org.geotools.math.Line;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -53,9 +56,12 @@ public class BusGPSRealtimeService {
 
 	RouteEstimatorService routeEstimatorService;
 	RedisService redisService;
+	final Logger logger;
 	
 	@Autowired
     public BusGPSRealtimeService(RouteEstimatorService routeEstimatorService, RedisService redisService) {
+
+		logger = LoggerFactory.getLogger(BusGPSRealtimeService.class);
 
 		this.routeEstimatorService = routeEstimatorService;
 		this.redisService = redisService;
@@ -69,12 +75,13 @@ public class BusGPSRealtimeService {
 			})
 	public void submityBusGPS(BusGPS busGPS) throws ParseException{
 
-		//todo log and fallback log
-
 		//Get the list of stops, along with coordinates and distance travlled etc.
 		if(redisService.isBusInBlacklist(busGPS.getLineId() + "."+ busGPS.getVehicleJourneyId())){
+			logger.info("Blacklisted journey id{}", busGPS.getVehicleJourneyId());
 			return;
 		}
+
+		logger.info("Starting Estimating Delay for journey id{}", busGPS.getVehicleJourneyId());
 
 		//Service caches reslt internally
 		List<Routes_enriched> stopsForTrip = routeEstimatorService.getEstimateRouteForGps(busGPS);//enrichedEnrichedRouteRepository.findByTripId(busGPS.getVehicleJourneyId());
@@ -90,7 +97,7 @@ public class BusGPSRealtimeService {
 		LineSegment closestSegment = indexedSegment.lineSegment;
 
 		//Index of original route point
-		int segStartIndex = indexedSegment.index *2;
+		int segStartIndex = indexedSegment.index;
 
 		//If we wanted to create a linestring
 		//Coordinate[] coords = new Coordinate[stopsForTrip.size()];
@@ -127,8 +134,8 @@ public class BusGPSRealtimeService {
 		Date endDate = timeFormatter.parse(endStop.getTimestamp());
 		Date startDate = timeFormatter.parse(startStop.getTimestamp());
 		
-		LocalDateTime endDateParsed;// = LocalDateTime.parse(endStop.getTimestamp(), timeFormatter);
-		LocalDateTime startDateParsed;// = LocalDateTime.parse(startStop.getTimestamp(), timeFormatter);
+		LocalDateTime endDateParsed;
+		LocalDateTime startDateParsed;
 		
 		String endStopTimestamp = endStop.getTimestamp();
 		String startStopTimestamp = endStop.getTimestamp();
@@ -187,7 +194,9 @@ public class BusGPSRealtimeService {
 		
 		
 		double delayInSeconds = Duration.between(expectedBusTime, actualBusTime).getSeconds();
-		
+
+		logger.info("Delay calculated for journey id : {}, delay : {}", busGPS.getVehicleJourneyId(), Double.valueOf(delayInSeconds));
+
 		//TODO Make this an async que
 		redisService.sendRedisMessage(busGPS.getLineId(), busGPS.getVehicleJourneyId() , delayInSeconds,  busGPS.getCoordinates());
 

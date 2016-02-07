@@ -42,9 +42,7 @@ public class Receiver{
         server.addConnectListener(new ConnectListener() {
             @Override
             public void onConnect(SocketIOClient client) {
-            	
-            	
-            	//clients.add(client);
+
             }
         });
         
@@ -91,9 +89,9 @@ public class Receiver{
 	
     public void receiveMessage(BusDelayed busInstance) {
     	
-    	String lineId = busInstance.getLineId();
+    	String tripId = busInstance.getTripId();
     	
-    	HashSet<SocketIOClient> clientSet =  clients.get(lineId);
+    	HashSet<SocketIOClient> clientSet =  clients.get(tripId);
 
     	if(clientSet != null){
     		for(SocketIOClient client : clientSet){

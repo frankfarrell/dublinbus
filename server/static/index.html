@@ -22,6 +22,10 @@
 
 	<script>
 
+		var params={};window.location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(str,key,value){params[key] = value;});
+
+		var tripId = params.tripId;
+
 		var map = L.map('map').setView([53.5914, -6.1562], 13);
 
 		L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -51,7 +55,7 @@
 			   L.geoJson(routes).addTo(map);
 			});
 		*/
-		$.get("http://localhost:8080/route_shapeses/4001",function(evt){
+		$.get("http://localhost:8080/route_shapeses/" + tripId,function(evt){
 			   
 			   route = evt.st_makeline;
 			   
@@ -59,7 +63,7 @@
 			});
 			
 	
-		$.get("http://localhost:8080/routes_enricheds/search/findByTripId?tripId=4001",function(evt){
+		$.get("http://localhost:8080/routes_enricheds/search/findByTripId?tripId=" + tripId,function(evt){
 			   
 			   route = evt._embedded.routes_enricheds;
 			   
@@ -77,22 +81,22 @@
              'force new connection' : true
            });
 		   
-		   socket.emit('subscribebus', 27);
+		socket.emit('subscribebus', tripId);
 
-           socket.on('busDelayed', function(busData) {
-                
-				var coords = busData.point.match(/POINT \((.*) (.*)\)/).slice(1);
-				
-				coords = coords.map(function(e){
-				    return parseFloat(e);
-				});
-				
-				var marker = L.marker([coords[1], coords[0]]).addTo(map);
-				marker.bindPopup("Delay: " + busData.delay + "\n Line: " + busData.lineId);
-				marker.valueOf()._icon.style.backgroundColor = 'green';
-				
-				//{"point":"POINT (-6.174601 53.442013)","delay":-59577.0,"lineId":"42","tripId":"7179"}
-           });
+	   socket.on('busDelayed', function(busData) {
+
+			var coords = busData.point.match(/POINT \((.*) (.*)\)/).slice(1);
+
+			coords = coords.map(function(e){
+				return parseFloat(e);
+			});
+
+			var marker = L.marker([coords[1], coords[0]]).addTo(map);
+			marker.bindPopup("Delay: " + busData.delay + "\n Line: " + busData.lineId);
+			marker.valueOf()._icon.style.backgroundColor = 'green';
+
+			//{"point":"POINT (-6.174601 53.442013)","delay":-59577.0,"lineId":"42","tripId":"7179"}
+	   });
 		
 		//http://localhost:8080/routes_enricheds/search/findByTripId?tripId=1
 	</script>
