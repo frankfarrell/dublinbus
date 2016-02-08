@@ -45,7 +45,7 @@ This should show a feed of calculations. Pick a line value after busdelayed.<thi
 
 ## Architecture
 
-[Diagram](https://github.com/frankfarrell/dublinbus/blob/master/DublinBusPipeline.png)
+![Diagram](https://github.com/frankfarrell/dublinbus/blob/master/DublinBusPipeline.png)
 
 * The endpoint for these connections is a Spring Reactor TcpServer. 
 
