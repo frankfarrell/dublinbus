@@ -39,6 +39,10 @@ repositories {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+configurations {
+    all*.exclude module: 'slf4j-log4j12'
+}
+
 dependencies {
 
     compile('com.netflix.hystrix:hystrix-core:1.4.23')
@@ -60,9 +64,9 @@ dependencies {
    
    compile "org.slf4j:slf4j-api:1.7.11"
    compile "ch.qos.logback:logback-classic:1.1.2"
-   
+
    //compile "com.fasterxml.jackson.core:jackson-databind:2.5.1"
-   
+
     testCompile("junit:junit")
    
     compile("org.springframework.boot:spring-boot-starter-data-rest")
@@ -81,13 +85,13 @@ dependencies {
     
     compile 'org.codehaus.jackson:jackson-core-asl:1.9.4'
     compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.4'
-    
+
     compile 'com.corundumstudio.socketio:netty-socketio:1.7.7'
     
     compile 'commons-collections:commons-collections:3.2.1'
 
 
-    
+
 }
 
 task wrapper(type: Wrapper) {

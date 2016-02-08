@@ -1,0 +1,1 @@
+Scracth Space for Spatial SQL Queries
