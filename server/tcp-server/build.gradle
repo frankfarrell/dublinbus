@@ -1,0 +1,48 @@
+buildscript {
+    ext {
+        springBootVersion = "1.5.7.RELEASE"
+        camelVersion = "2.20.1"
+        nebulaVersion = "4.0.1"
+    }
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("com.netflix.nebula:nebula-release-plugin:${nebulaVersion}")
+    }
+}
+
+apply plugin: 'java'
+//apply plugin: "org.springframework.boot"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+group="com.github.frankfarrell"
+version = "0.0.1"
+
+jar {
+    baseName = "dublinbus-tcp-server"
+    manifest {
+        attributes("Implementation-Title": "Dublin bus tcp server", "Implementation-Version": version)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile("org.springframework.boot:spring-boot-starter:${springBootVersion}")
+    compile("org.apache.camel:camel-spring-boot-starter:${camelVersion}")
+    compile("org.apache.camel:camel-core:${camelVersion}")
+    compile("org.apache.camel:camel-netty4:${camelVersion}")
+    compile("org.apache.camel:camel-spring-redis:${camelVersion}")
+    compile("org.apache.camel:camel-rabbitmq:${camelVersion}")
+
+    testCompile("junit:junit:4.11")
+    testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testCompile("org.apache.camel:camel-test-spring:${camelVersion}")
+}
